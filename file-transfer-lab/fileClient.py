@@ -29,13 +29,21 @@ def main():
 				print("Please try again.")
 
 			else:
-				break
+				s.sendall(filename.encode() + ("oof," + str(getSize(filename)) + "oof,").encode())
+				#TODO replace the comma with a character that won't be in the file
+				while True:
+					data = fs.read(1024)
+					s.sendall(data)
+					if not data:
+						break
+				fs.close()
+				print('Send complete.')
 
 				
-		s.sendall(filename.encode() + ("," + str(getSize(filename))).encode())
 		
+	
 		
-		data = s.recv(1024)
+#		data = s.recv(1024)
 		
 		
 
