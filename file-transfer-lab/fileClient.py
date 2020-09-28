@@ -13,6 +13,7 @@ def getSize(filename):
     return st.st_size  #filesize in bytes
 
 
+#TODO: Delete file?
 
 def main():
 	with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -22,12 +23,13 @@ def main():
 		print("Hello User, type the name of your file you would like to send.")
 		while True:
 			filename = input("$ ")
+			if filename == "exit":
+				sys.exit(0)
 			try:
 				fs = open(filename, 'rb')
 			except IOError:
 				pass
-				print("Please try again.")
-
+				print("File not found, please try again.")
 			else:
 				s.sendall(filename.encode() + ("oof," + str(getSize(filename)) + "oof,").encode())
 				#TODO replace the comma with a character that won't be in the file
@@ -39,13 +41,6 @@ def main():
 				fs.close()
 				print('Send complete.')
 
-				
-		
-	
-		
-#		data = s.recv(1024)
-		
-		
 
 		#maybe from this side I can send an end of file char to signal file end
 	#    s.sendall(b'Hello, world')
