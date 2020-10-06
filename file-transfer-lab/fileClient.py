@@ -27,7 +27,8 @@ while True:
 	print("Hello User, type the name of your file you would like to send.")
 	fileName = input("$ ")
 	if fileName == "exit":
-		sys.exit(0)
+		break
+#		sys.exit(0)
 	try:
 		fs = open(fileName, 'rb')
 		break

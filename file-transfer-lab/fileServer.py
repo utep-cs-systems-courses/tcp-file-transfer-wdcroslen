@@ -48,28 +48,32 @@ def main():
 
 		from framedSock import framedSend, framedReceive
 		
-		if not os.fork():
+		if not os.fork(): #fork process to receive multiple connections
 			print("new child process handling connection from", addr)
 			payload = ""
-			try:
-				fileName, fileContents = framedReceive(sock, debug)
-			except:
-				print("File transfer failed")
-				sys.exit(1)
-
+			
+			#receive file name and contents
+			fileName, fileContents = framedReceive(sock, debug)
+			
+			
 			if debug: print("rec'd: ", payload)
 
 			if payload is None:
 				print("File contents were empty, exiting...")
 				sys.exit(1)
-
+			
+			#receive fileName
 			fileName = fileName.decode()
+			if fileName == "exit":
+				sys.exit(0)
+				
 			try:
+				#write file to transfer dir
 				if not os.path.isfile("./transfer/" + fileName):
 					file = open("./transfer/" + fileName, 'w+b')
 					file.write(fileContents)
 					file.close()
-					print("File", fileName, "successfully accepted!")
+					print("File:", fileName, "successfully accepted!")
 					sys.exit(0)
 				else:
 					print("File: ", fileName, "already exists.")
