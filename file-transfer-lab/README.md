@@ -1,0 +1,3 @@
+The purpose of this lab is to be able to transfer files from a client to a server and receive multiple connections.
+
+The way I conducted this was essentially by reading a file and sending all the contents and the name of the file through the framedSend, and then on the Server end, I prepared to accept these connections by using a Thread with a lock in case of multiple connections at once. The server uses framedReceive and then writes the file to the *transfer* directory unless it already exists or is empty.
