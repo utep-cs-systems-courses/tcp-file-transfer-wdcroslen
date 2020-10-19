@@ -4,6 +4,9 @@ import sys
 sys.path.append("../lib")       # for params
 import re, socket, params, os
 
+from threading import Thread, Lock
+lock = Lock()
+
 HOST = '127.0.0.1'# Standard loopback interface address (localhost)
 PORT = 65432# Port to listen on (non-privileged ports are > 1023)
 
@@ -47,8 +50,6 @@ lsock.bind(bindAddr)
 lsock.listen(5)
 print("listening on:", bindAddr)
 
-	
-from threading import Thread;
 
 class Server(Thread):
 	def __init__(self, lsock):
@@ -61,7 +62,7 @@ class Server(Thread):
 
 			print("new child process handling connection from", self.addr)
 			payload = ""
-
+			lock.acquire()
 			#receive file name and contents
 			fileName, fileContents = framedReceive(self.sock, debug)
 
@@ -70,11 +71,13 @@ class Server(Thread):
 
 			if payload is None:
 				print("File contents were empty, exiting...")
+				lock.release()
 				sys.exit(1)
 
 			#receive fileName
 			fileName = fileName.decode()
 			if fileName == "exit":
+				lock.release()
 				sys.exit(0)
 
 			try:
@@ -84,12 +87,16 @@ class Server(Thread):
 					file.write(fileContents)
 					file.close()
 					print("File:", fileName, "successfully accepted!")
+					lock.release()
 					sys.exit(0)
 				else:
 					print("File: ", fileName, "already exists.")
+					lock.release()
 					sys.exit(1)
+					
 			except FileNotFoundError:
 				print("File Not Found")
+				lock.release()
 				sys.exit(1)
 				
 while True:
