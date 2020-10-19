@@ -35,38 +35,48 @@ def writeFile(filename, biteSyze, conn): #FIXME: second file writing does nothin
 
 	fileWriter.close()
 
-def main():
-#	
-	lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # listener socket
-	bindAddr = ("127.0.0.1", listenPort)
-	lsock.bind(bindAddr)
-	lsock.listen(5)
-	print("listening on:", bindAddr)
+	
+	
+	
+	
 
-	while True:
-		sock, addr = lsock.accept()
 
-		from framedSock import framedSend, framedReceive
+lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # listener socket
+bindAddr = ("127.0.0.1", listenPort)
+lsock.bind(bindAddr)
+lsock.listen(5)
+print("listening on:", bindAddr)
+
+	
+from threading import Thread;
+
+class Server(Thread):
+	def __init__(self, lsock):
+		Thread.__init__(self)
+		self.sock, self.addr = lsock
 		
-		if not os.fork(): #fork process to receive multiple connections
-			print("new child process handling connection from", addr)
+	def run(self):
+		while True:
+			from framedSock import framedSend, framedReceive
+
+			print("new child process handling connection from", self.addr)
 			payload = ""
-			
+
 			#receive file name and contents
-			fileName, fileContents = framedReceive(sock, debug)
-			
-			
+			fileName, fileContents = framedReceive(self.sock, debug)
+
+
 			if debug: print("rec'd: ", payload)
 
 			if payload is None:
 				print("File contents were empty, exiting...")
 				sys.exit(1)
-			
+
 			#receive fileName
 			fileName = fileName.decode()
 			if fileName == "exit":
 				sys.exit(0)
-				
+
 			try:
 				#write file to transfer dir
 				if not os.path.isfile("./transfer/" + fileName):
@@ -81,8 +91,9 @@ def main():
 			except FileNotFoundError:
 				print("File Not Found")
 				sys.exit(1)
-	
-if __name__ == '__main__':
-    main()
-
+				
+while True:
+    sockAddr = lsock.accept()
+    server = Server(sockAddr)
+    server.start()
 			
